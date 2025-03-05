@@ -11,40 +11,100 @@ import {
     TextStyle,
     Texture,
 } from 'pixi.js';
-import { initDevtools } from '@pixi/devtools';
+import { initDevtools } from '@pixi/devtools'
 
+Assets.addBundle('fonts', [{alias: 'Irish', src: 'fonts/IrishGrover-Regular.ttf ' }]);
+await Assets.loadBundle('fonts');
 
 (async () => {
-    // Create a new application
+
+    // create new app
     const app = new Application();
-    initDevtools({ app });
-    // Initialize the application
+    //initialize dev tool on the app 
+    initDevtools({app});
+
     await app.init({resizeTo: window });
 
-    // Append the application canvas to the document body
+    // append the application canvas to the document body
     document.body.appendChild(app.canvas);
 
-    // Load background image
-    const txtureBg = await Assets.load('images/assets/bg.jpg')
-    const sprBg = Sprite.from(txtureBg);
+    // prevents from having scroll bar
+    app.canvas.style.position = "absolute";
+
+    // load background image
+    const textureBg = await Assets.load('images/assets/back.png');
+    const sprBg = Sprite.from(textureBg);
+
     app.stage.addChild(sprBg);
 
+    // set bg to the same dimension as screen
     sprBg.width = app.screen.width;
     sprBg.height = app.screen.height;
-
-    // Create container for titlle
-    const containerTop = new Container();
-    app.stage.addChild(containerTop);
-    containerTop.width = app.screen.width;
-
-    // Load title
-    const txtureTitle = await Assets.load('images/assets/SLOT.png')
-    const sprTitle = Sprite.from(txtureTitle);
-    containerTop.addChild(sprTitle);
-    sprTitle.setSize(800,500);
     
-    sprTitle.x = Math.round((containerTop.width - sprTitle.width) / 2);
-    sprTitle.y = 0;
+    // set blur effect on logo
+    const blurBg = new BlurFilter();
+    // blurBg.blur =8;
+    // sprBg.filters=blurBg;
+
+    // create container for title
+    const containerTitle = new Container();
+    app.stage.addChild(containerTitle);
+
+    // load logo
+    const textureLogo = await Assets.load('images/assets/SLOT.png');
+    const sprLogo = Sprite.from(textureLogo);
+    app.stage.addChild(sprLogo);
+
+    //change logo position and size
+    sprLogo.anchor.set(0.5);
+    sprLogo.setSize(400,250);
+    sprLogo.x = (app.screen.width / 2);
+    sprLogo.y = 110
+
+    containerTitle.addChild(sprLogo);
+    
+    // create container for the symbols
+    const containerGrid = new Container();
+    app.stage.addChild(containerGrid);
+    
+    // create background rectangle
+    const rectangle = new Graphics()
+    .roundRect(0,0, 900, 500)
+    .fill({
+        color:'#ffffff', // Sets the color
+        alpha: 0.4     // Sets the opacity
+      });
+    containerGrid.addChild(rectangle); 
+
+    containerGrid.y = (app.screen.height - containerGrid.height)/2;
+    containerGrid.x = (app.screen.width - containerGrid.width)/2;
+
+    // create mask to prevent the symbols from going out of bounds
+    let mask = new Graphics()
+    .roundRect(0,0, 1450, 710)
+    .fill({
+        color:'#ffffff', // Sets the color
+        alpha: 0.4     // Sets the opacity
+      });
+    
+    containerGrid.mask = mask;
+    
+
+
+    //try parallax background
+    let bgBack, bgMiddle, bgFront, bgX = 0, bgSpeed = 1;
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Load the textures
     await Assets.load([
@@ -62,9 +122,6 @@ import { initDevtools } from '@pixi/devtools';
         'images/assets/s4.png'
     ]);
 
-    const REEL_WIDTH = 150;
-    const SYMBOL_SIZE = 120;
-
     // Create different slot symbols
     const slotTextures: Texture[] = [
         Texture.from('images/assets/A.png'),
@@ -81,7 +138,14 @@ import { initDevtools } from '@pixi/devtools';
         Texture.from('images/assets/s4.png')
     ];
 
-    // Build the reels
+    // Set size of sprites and slots
+    const widthReel = 170;
+    const sizeSymbol = 130; 
+    
+    // const reels:{
+
+    // }[] = [];
+
     const reels: {
         container: Container;
         symbols: Sprite[];
@@ -89,19 +153,16 @@ import { initDevtools } from '@pixi/devtools';
         previousPosition: number;
         blur: BlurFilter;
     }[] = [];
-    const reelContainer = new Container();
-
-    const reelMarginTop = 50;  // You can adjust this value to add space between title and reels
-    reelContainer.y = sprTitle.y + sprTitle.height + reelMarginTop;
 
     for (let i = 0; i < 5; i++) {
-        const rc = new Container();
+        const containerRow = new Container();
 
-        rc.x = i * REEL_WIDTH;
-        reelContainer.addChild(rc);
-
+        containerRow.x = i * widthReel + 43.5; // sets the spacing between each row as it loops
+        containerRow.y = 185;
+        containerGrid.addChild(containerRow);
+        
         const reel = {
-            container: rc,
+            container: containerRow,
             symbols: [] as Sprite[],
             position: 0,
             previousPosition: 0,
@@ -110,108 +171,61 @@ import { initDevtools } from '@pixi/devtools';
 
         reel.blur.blurX = 0;
         reel.blur.blurY = 0;
-        rc.filters = [reel.blur];
+        containerRow.filters = [reel.blur];
 
         // Build the symbols
         for (let j = 0; j < 3; j++) {
             const symbol = new Sprite(slotTextures[Math.floor(Math.random() * slotTextures.length)]);
             // Scale the symbol to fit symbol area.
-            symbol.y = j * SYMBOL_SIZE;
-            symbol.scale.x = symbol.scale.y = Math.min(SYMBOL_SIZE / symbol.width, SYMBOL_SIZE / symbol.height);
-            symbol.x = Math.round((SYMBOL_SIZE - symbol.width) / 2);
+            symbol.y = j * sizeSymbol;
+            symbol.scale.x = symbol.scale.y = Math.min(sizeSymbol / symbol.width, sizeSymbol / symbol.height);
+            symbol.x = Math.round((sizeSymbol - symbol.width) / 2);
             reel.symbols.push(symbol);
-            rc.addChild(symbol);
+            containerRow.addChild(symbol);
         }
         reels.push(reel);
     }
-    app.stage.addChild(reelContainer);
+    app.stage.addChild(containerGrid);
 
-    // Build top & bottom covers and position reelContainer
-    const margin = (app.screen.height - SYMBOL_SIZE * 3) / 2;
+    // containerGrid.x = Math.round((app.screen.width - widthReel * 5) / 2);
 
-    reelContainer.y = margin;
-    reelContainer.x = Math.round((app.screen.width - REEL_WIDTH * 5) / 2);
+    // create container for the spin button
+    const containerSpin = new Container();
+    app.stage.addChild(containerSpin);
 
+    const textureBtn = await Assets.load('images/assets/spin.png');
+    const sprBtn = Sprite.from(textureBtn);
+
+    sprBtn.width = 600;
+    sprBtn.height = 80;
     
+    containerSpin.addChild(sprBtn);
 
-    // Create gradient fill
-    const fill = new FillGradient(0, 0, 0, 2);
+    containerSpin.x = (app.screen.width - sprBtn.width) / 2;
+    containerSpin.y = 780;
 
-    const colors = [0xffffff, 0x00ff99].map((color) => Color.shared.setValue(color).toNumber());
-
-    colors.forEach((number, index) => {
-        const ratio = index / colors.length;
-
-        fill.addColorStop(ratio, number);
+    // make spin clickable
+    containerSpin.eventMode = 'static';
+    containerSpin.cursor = 'pointer';
+    containerSpin.addListener('pointerdown', () =>{
+        play();
     });
 
-    // Add Cyndaquill
-    const txtureCyndaquil = await Assets.load('images/assets/cyndaquil-fire.png');
-    const sprCyndaquil = Sprite.from(txtureCyndaquil);
-    app.stage.addChild(sprCyndaquil);
 
-    sprCyndaquil.scale.set(0.5, 0.5);
-    sprCyndaquil.position.set(20, 450);
-
-    // Add play text
-    const style = new TextStyle({
-        fontFamily: 'Arial',
-        fontSize: 36,
-        fontStyle: 'italic',
-        fontWeight: 'bold',
-        fill: { fill },
-        stroke: { color: 0x4a1850, width: 5 },
-        dropShadow: {
-            color: 0x000000,
-            angle: Math.PI / 6,
-            blur: 4,
-            distance: 6,
-        },
-        wordWrap: true,
-        wordWrapWidth: 440,
-    });
-
-    
-    
-    
-    const bottom = new Graphics()
-    .rect(0, SYMBOL_SIZE * 3 + margin, app.screen.width, margin);
-    const playText = new Text('Spin!', style);
-
-    playText.x = Math.round((bottom.width - playText.width) / 2);
-    playText.y = app.screen.height - 50;
-    bottom.addChild(playText);
-
-    // Add header text
-    const headerText = new Text('Pokemon Slot', style);
-
-    sprTitle.x = Math.round((containerTop.width - headerText.width) / 2);
-    sprTitle.y = Math.round((margin - headerText.height) / 2);
-
-    app.stage.addChild(containerTop);
-    app.stage.addChild(bottom);
-
-    // Set the interactivity.
-    playText.eventMode = 'static';
-    playText.cursor = 'pointer';
-    playText.addListener('pointerdown', () => {
-        startPlay();
-    });
 
     let running = false;
 
-    // Function to start playing.
-    function startPlay() {
-        if (running) return;
+    function play(){
+        if (running) return; 
         running = true;
-
-        for (let i = 0; i < reels.length; i++) {
-            const r = reels[i];
+    
+        for (let i = 0; i < reels.length; i++ ){
+            const rowIndex = reels[i];
             const extra = Math.floor(Math.random() * 1);
-            const target = r.position + 10 + i * 5 + extra;
-            const time = 2500 + i * 600 + extra * 600;
+            const target = rowIndex.position + 10 + i * 5 + extra;
+            const time = 2500 + i * 600 + extra * 600; 
 
-            tweenTo(r, 'position', target, time, backout(0.5), null, i === reels.length - 1 ? reelsComplete : null);
+            tweenTo(rowIndex, 'position', target, time, backout(0.5), null, i === reels.length - 1 ? reelsComplete : null);
         }
     }
 
@@ -224,22 +238,22 @@ import { initDevtools } from '@pixi/devtools';
     app.ticker.add(() => {
         // Update the slots.
         for (let i = 0; i < reels.length; i++) {
-            const r = reels[i];
+            const rowIndex = reels[i];
             // Update blur filter y amount based on speed.
-            r.blur.blurY = (r.position - r.previousPosition) * 8;
-            r.previousPosition = r.position;
+            rowIndex.blur.blurY = (rowIndex.position - rowIndex.previousPosition) * 8;
+            rowIndex.previousPosition = rowIndex.position;
 
             // Update symbol positions on reel.
-            for (let j = 0; j < r.symbols.length; j++) {
-                const s = r.symbols[j];
+            for (let j = 0; j < rowIndex.symbols.length; j++) {
+                const s = rowIndex.symbols[j];
                 const prevy = s.y;
 
-                s.y = ((r.position + j) % r.symbols.length) * SYMBOL_SIZE - SYMBOL_SIZE;
-                if (s.y < 0 && prevy > SYMBOL_SIZE) {
+                s.y = ((rowIndex.position + j) % rowIndex.symbols.length) * sizeSymbol - sizeSymbol;
+                if (s.y < 0 && prevy > sizeSymbol) {
                     // Detect going over and swap a texture.
                     s.texture = slotTextures[Math.floor(Math.random() * slotTextures.length)];
-                    s.scale.x = s.scale.y = Math.min(SYMBOL_SIZE / s.texture.width, SYMBOL_SIZE / s.texture.height);
-                    s.x = Math.round((SYMBOL_SIZE - s.width) / 2);
+                    s.scale.x = s.scale.y = Math.min(sizeSymbol / s.texture.width, sizeSymbol / s.texture.height);
+                    s.x = Math.round((sizeSymbol - s.width) / 2);
                 }
             }
         }
