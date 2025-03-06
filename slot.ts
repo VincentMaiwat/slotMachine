@@ -10,6 +10,7 @@ import {
     Text,
     TextStyle,
     Texture,
+    TilingSprite,
 } from 'pixi.js';
 import { initDevtools } from '@pixi/devtools'
 
@@ -30,17 +31,58 @@ await Assets.loadBundle('fonts');
 
     // prevents from having scroll bar
     app.canvas.style.position = "absolute";
-
+    
     // load background image
     const textureBg = await Assets.load('images/assets/back.png');
     const sprBg = Sprite.from(textureBg);
-
-    app.stage.addChild(sprBg);
 
     // set bg to the same dimension as screen
     sprBg.width = app.screen.width;
     sprBg.height = app.screen.height;
     
+    const containerBg = new Container();
+    containerBg.addChild(sprBg);
+    app.stage.addChild(containerBg);
+
+    const textures = await Assets.load([
+        "images/assets/middle.png",
+        "images/assets/front.png"
+    ]);
+
+        // Create TilingSprite for middle layer
+        const sprMiddle = new TilingSprite({
+            texture: textures["images/assets/middle.png"],
+            width: app.screen.width,
+            height: app.screen.height
+        });
+    
+        // Create TilingSprite for front layer
+        const sprFront = new TilingSprite({
+            texture: textures["images/assets/front.png"],
+            width: app.screen.width,
+            height: app.screen.height
+        });
+
+        sprMiddle.tileScale.set(
+            app.screen.width / sprMiddle.texture.width,
+            app.screen.height / sprMiddle.texture.height
+        );
+    
+        sprFront.tileScale.set(
+            app.screen.width / sprFront.texture.width,
+            app.screen.height / sprFront.texture.height
+        );
+    
+        // Add middle and front layers to container
+        containerBg.addChild(sprMiddle);
+        containerBg.addChild(sprFront); // This ensures it's on top
+    
+        // Animate the background layers
+        app.ticker.add(() => {
+            sprMiddle.tilePosition.x += 0.5; // Moves middle layer
+            sprFront.tilePosition.x += 1;    // Moves front layer faster
+    });
+
     // set blur effect on logo
     const blurBg = new BlurFilter();
     // blurBg.blur =8;
@@ -89,22 +131,6 @@ await Assets.loadBundle('fonts');
     
     containerGrid.mask = mask;
     
-
-
-    //try parallax background
-    let bgBack, bgMiddle, bgFront, bgX = 0, bgSpeed = 1;
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Load the textures
     await Assets.load([
