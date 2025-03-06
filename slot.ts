@@ -21,7 +21,7 @@ await Assets.loadBundle('fonts');
 
     // create new app
     const app = new Application();
-    //initialize dev tool on the app 
+    //initialize dev tool on the app
     initDevtools({app});
 
     await app.init({resizeTo: window });
@@ -31,7 +31,7 @@ await Assets.loadBundle('fonts');
 
     // prevents from having scroll bar
     app.canvas.style.position = "absolute";
-    
+
     // load background image
     const textureBg = await Assets.load('images/assets/back.png');
     const sprBg = Sprite.from(textureBg);
@@ -39,54 +39,50 @@ await Assets.loadBundle('fonts');
     // set bg to the same dimension as screen
     sprBg.width = app.screen.width;
     sprBg.height = app.screen.height;
-    
+
+    // create container for the backgrounds
     const containerBg = new Container();
     containerBg.addChild(sprBg);
     app.stage.addChild(containerBg);
 
+    // load textures for tiling
     const textures = await Assets.load([
         "images/assets/middle.png",
         "images/assets/front.png"
     ]);
 
-        // Create TilingSprite for middle layer
-        const sprMiddle = new TilingSprite({
-            texture: textures["images/assets/middle.png"],
-            width: app.screen.width,
-            height: app.screen.height
-        });
-    
-        // Create TilingSprite for front layer
-        const sprFront = new TilingSprite({
-            texture: textures["images/assets/front.png"],
-            width: app.screen.width,
-            height: app.screen.height
-        });
-
-        sprMiddle.tileScale.set(
-            app.screen.width / sprMiddle.texture.width,
-            app.screen.height / sprMiddle.texture.height
-        );
-    
-        sprFront.tileScale.set(
-            app.screen.width / sprFront.texture.width,
-            app.screen.height / sprFront.texture.height
-        );
-    
-        // Add middle and front layers to container
-        containerBg.addChild(sprMiddle);
-        containerBg.addChild(sprFront); // This ensures it's on top
-    
-        // Animate the background layers
-        app.ticker.add(() => {
-            sprMiddle.tilePosition.x += 0.5; // Moves middle layer
-            sprFront.tilePosition.x += 1;    // Moves front layer faster
+    // create tiling sprite
+    const sprMiddle = new TilingSprite({
+        texture: textures["images/assets/middle.png"],
+        width: app.screen.width,
+        height: app.screen.height
     });
 
-    // set blur effect on logo
-    const blurBg = new BlurFilter();
-    // blurBg.blur =8;
-    // sprBg.filters=blurBg;
+    const sprFront = new TilingSprite({
+        texture: textures["images/assets/front.png"],
+        width: app.screen.width,
+        height: app.screen.height
+    });
+
+    //set tiling position
+    sprMiddle.tileScale.set(
+        app.screen.width / sprMiddle.texture.width,
+        app.screen.height / sprMiddle.texture.height
+    );
+
+    sprFront.tileScale.set(
+        app.screen.width / sprFront.texture.width,
+        app.screen.height / sprFront.texture.height
+    );
+
+    containerBg.addChild(sprMiddle);
+    containerBg.addChild(sprFront);
+
+    // move sprites
+    app.ticker.add(() => {
+        sprMiddle.tilePosition.x += 0.5;
+        sprFront.tilePosition.x += 1;
+    });
 
     // create container for title
     const containerTitle = new Container();
@@ -99,16 +95,16 @@ await Assets.loadBundle('fonts');
 
     //change logo position and size
     sprLogo.anchor.set(0.5);
-    sprLogo.setSize(400,250);
+    sprLogo.setSize(400,280);
     sprLogo.x = (app.screen.width / 2);
-    sprLogo.y = 110
+    sprLogo.y = 130
 
     containerTitle.addChild(sprLogo);
-    
+
     // create container for the symbols
     const containerGrid = new Container();
     app.stage.addChild(containerGrid);
-    
+
     // create background rectangle
     const rectangle = new Graphics()
     .roundRect(0,0, 900, 500)
@@ -116,10 +112,15 @@ await Assets.loadBundle('fonts');
         color:'#ffffff', // Sets the color
         alpha: 0.4     // Sets the opacity
       });
-    containerGrid.addChild(rectangle); 
+    containerGrid.addChild(rectangle);
 
     containerGrid.y = (app.screen.height - containerGrid.height)/2;
     containerGrid.x = (app.screen.width - containerGrid.width)/2;
+
+    // create blur filter for the rectangle
+    const blurRect = new BlurFilter();
+    blurRect.blur = 1;
+    rectangle.filters = [blurRect];
 
     // create mask to prevent the symbols from going out of bounds
     let mask = new Graphics()
@@ -128,9 +129,8 @@ await Assets.loadBundle('fonts');
         color:'#ffffff', // Sets the color
         alpha: 0.4     // Sets the opacity
       });
-    
+
     containerGrid.mask = mask;
-    
 
     // Load the textures
     await Assets.load([
@@ -166,11 +166,7 @@ await Assets.loadBundle('fonts');
 
     // Set size of sprites and slots
     const widthReel = 170;
-    const sizeSymbol = 130; 
-    
-    // const reels:{
-
-    // }[] = [];
+    const sizeSymbol = 130;
 
     const reels: {
         container: Container;
@@ -186,7 +182,7 @@ await Assets.loadBundle('fonts');
         containerRow.x = i * widthReel + 43.5; // sets the spacing between each row as it loops
         containerRow.y = 185;
         containerGrid.addChild(containerRow);
-        
+
         const reel = {
             container: containerRow,
             symbols: [] as Sprite[],
@@ -213,7 +209,45 @@ await Assets.loadBundle('fonts');
     }
     app.stage.addChild(containerGrid);
 
-    // containerGrid.x = Math.round((app.screen.width - widthReel * 5) / 2);
+    const textureCyn = await Assets.load('images/assets/cyndaquil.png');
+    const textureCynFire = await Assets.load('images/assets/cyndaquil-fire.png');
+    const sprCyn = Object.assign(Sprite.from(textureCyn), {
+        width: 290,
+        height: 300,
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: 330, y: 580 },
+        visible: true,
+    });
+    sprCyn.scale.x *= -1; // flip horizontally
+
+    const sprCyn1 = Object.assign(Sprite.from(textureCyn), {
+        width: 290,
+        height: 300,
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: 1590, y: 580 },
+        visible: true,
+    });
+
+    const sprCynF = Object.assign(Sprite.from(textureCynFire), {
+        width: 400,
+        height: 400,
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: 1650, y: 530 },
+        visible: false,
+    });
+    const sprCynF1 = Object.assign(Sprite.from(textureCynFire), {
+        width: 400,
+        height: 400,
+        anchor: { x: 0.5, y: 0.5 },
+        position: { x: 270, y: 530 },
+        visible: false,
+    });
+    sprCynF1.scale.x *= -1;
+
+    app.stage.addChild(sprCyn);
+    app.stage.addChild(sprCyn1);
+    app.stage.addChild(sprCynF);
+    app.stage.addChild(sprCynF1);
 
     // create container for the spin button
     const containerSpin = new Container();
@@ -222,34 +256,64 @@ await Assets.loadBundle('fonts');
     const textureBtn = await Assets.load('images/assets/spin.png');
     const sprBtn = Sprite.from(textureBtn);
 
-    sprBtn.width = 600;
-    sprBtn.height = 80;
-    
-    containerSpin.addChild(sprBtn);
+    sprBtn.width = 550;
+    sprBtn.height = 70;
 
+    containerSpin.addChild(sprBtn);
     containerSpin.x = (app.screen.width - sprBtn.width) / 2;
-    containerSpin.y = 780;
+    containerSpin.y = 750;
 
     // make spin clickable
     containerSpin.eventMode = 'static';
     containerSpin.cursor = 'pointer';
+
+    const textureGl = await Assets.load('images/assets/gl.png');
+    const sprGl = Sprite.from(textureGl);
+
+    sprBtn.width = 550;
+    sprBtn.height = 70;
+
+    containerSpin.addChild(sprGl);
+    containerSpin.x = (app.screen.width - sprBtn.width) / 2;
+    containerSpin.y = 750;
+
+    sprGl.width = 550;
+    sprGl.height = 70;
+    sprGl.visible = false;
+
     containerSpin.addListener('pointerdown', () =>{
         play();
     });
+    let isSpinVisible = true;
+    let blinkSpeed = 0.01;
+    let increasing = false;
 
+    app.ticker.add(() => { // create blinking animation for spin button
+        if (increasing) {
+            sprBtn.alpha += blinkSpeed;
+            if (sprBtn.alpha >= 1) increasing = false, isSpinVisible = false; // Reverse direction
+        } else {
+            sprBtn.alpha -= blinkSpeed;
+            if (sprBtn.alpha <= 0.2) increasing = true, isSpinVisible = false; // Reverse direction
+        }
 
-
+    });
+    // function to change visibilities and animate slot machine
     let running = false;
 
     function play(){
-        if (running) return; 
+        [sprCyn, sprCyn1, sprBtn ].forEach(sprite => sprite.visible = false);
+        [sprCynF, sprCynF1, sprGl].forEach(sprite => sprite.visible = true);
+        sprBtn.visible=false;
+        sprGl.visible=true;
+        if (running) return;
         running = true;
-    
+
         for (let i = 0; i < reels.length; i++ ){
             const rowIndex = reels[i];
             const extra = Math.floor(Math.random() * 1);
             const target = rowIndex.position + 10 + i * 5 + extra;
-            const time = 2500 + i * 600 + extra * 600; 
+            const time = 1500 + i * 600 + extra * 600;
 
             tweenTo(rowIndex, 'position', target, time, backout(0.5), null, i === reels.length - 1 ? reelsComplete : null);
         }
@@ -257,6 +321,8 @@ await Assets.loadBundle('fonts');
 
     // Reels done handler.
     function reelsComplete() {
+        [sprCynF, sprCynF1, sprGl].forEach(sprite => sprite.visible = false);
+        [sprCyn, sprCyn1, sprBtn].forEach(sprite => sprite.visible = true);
         running = false;
     }
 
@@ -285,6 +351,27 @@ await Assets.loadBundle('fonts');
         }
     });
 
+        // create coin area
+        const containerCoins = new Container();
+        app.stage.addChild(containerCoins);
+
+        const rectCoins = new Graphics()
+        .roundRect(0,0, 320, 90)
+        .fill({
+            color:'#530202', // Sets the color
+          })
+        .stroke({
+            width: 2,
+            color: 0xFFCB00
+        });
+        containerCoins.addChild(rectCoins);
+        containerCoins.y = 280;
+        containerCoins.x = 1450;
+
+        const balance: number = 1000;
+        const txtCoins = new Text({text: balance, style:{fontFamily: 'pokemon'}})
+
+        containerCoins.addChild(txtCoins)
     // Very simple tweening utility function. This should be replaced with a proper tweening library in a real product.
     const tweening: any[] = [];
 
