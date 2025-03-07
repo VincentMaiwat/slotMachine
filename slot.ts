@@ -88,39 +88,39 @@ await Assets.loadBundle('fonts');
     const containerTitle = new Container();
     app.stage.addChild(containerTitle);
 
-    // load logo
-    const textureLogo = await Assets.load('images/assets/SLOT.png');
-    const sprLogo = Sprite.from(textureLogo);
-    app.stage.addChild(sprLogo);
+        // load logo
+        const textureLogo = await Assets.load('images/assets/SLOT.png');
+        const sprLogo = Sprite.from(textureLogo);
+        app.stage.addChild(sprLogo);
 
-    //change logo position and size
-    sprLogo.anchor.set(0.5);
-    sprLogo.setSize(400,280);
-    sprLogo.x = (app.screen.width / 2);
-    sprLogo.y = 130
+        //change logo position and size
+        sprLogo.anchor.set(0.5);
+        sprLogo.setSize(400,280);
+        sprLogo.x = (app.screen.width / 2);
+        sprLogo.y = 130
 
-    containerTitle.addChild(sprLogo);
+        containerTitle.addChild(sprLogo);
 
     // create container for the symbols
     const containerGrid = new Container();
+
+        // create background rectangle
+        const rectangle = new Graphics()
+        .roundRect(0,0, 900, 500)
+        .fill({
+            color:'#ffffff', // Sets the color
+            alpha: 0.4     // Sets the opacity
+        });
+        containerGrid.addChild(rectangle);
+
+        // create blur filter for the rectangle
+        const blurRect = new BlurFilter();
+        blurRect.blur = 1;
+        rectangle.filters = [blurRect];
+
     app.stage.addChild(containerGrid);
-
-    // create background rectangle
-    const rectangle = new Graphics()
-    .roundRect(0,0, 900, 500)
-    .fill({
-        color:'#ffffff', // Sets the color
-        alpha: 0.4     // Sets the opacity
-      });
-    containerGrid.addChild(rectangle);
-
     containerGrid.y = (app.screen.height - containerGrid.height)/2;
     containerGrid.x = (app.screen.width - containerGrid.width)/2;
-
-    // create blur filter for the rectangle
-    const blurRect = new BlurFilter();
-    blurRect.blur = 1;
-    rectangle.filters = [blurRect];
 
     // create mask to prevent the symbols from going out of bounds
     let mask = new Graphics()
@@ -179,43 +179,44 @@ await Assets.loadBundle('fonts');
     for (let i = 0; i < 5; i++) {
         const containerRow = new Container();
 
-        containerRow.x = i * widthReel + 43.5; // sets the spacing between each row as it loops
-        containerRow.y = 185;
-        containerGrid.addChild(containerRow);
+            containerRow.x = i * widthReel + 43.5; // sets the spacing between each row as it loops
+            containerRow.y = 185;
+            containerGrid.addChild(containerRow);
 
-        const reel = {
-            container: containerRow,
-            symbols: [] as Sprite[],
-            position: 0,
-            previousPosition: 0,
-            blur: new BlurFilter(),
-        };
+            const reel = {
+                container: containerRow,
+                symbols: [] as Sprite[],
+                position: 0,
+                previousPosition: 0,
+                blur: new BlurFilter(),
+            };
 
-        reel.blur.blurX = 0;
-        reel.blur.blurY = 0;
-        containerRow.filters = [reel.blur];
+            reel.blur.blurX = 0;
+            reel.blur.blurY = 0;
+            containerRow.filters = [reel.blur];
 
-        // Build the symbols
-        for (let j = 0; j < 3; j++) {
-            const symbol = new Sprite(slotTextures[Math.floor(Math.random() * slotTextures.length)]);
-            // Scale the symbol to fit symbol area.
-            symbol.y = j * sizeSymbol;
-            symbol.scale.x = symbol.scale.y = Math.min(sizeSymbol / symbol.width, sizeSymbol / symbol.height);
-            symbol.x = Math.round((sizeSymbol - symbol.width) / 2);
-            reel.symbols.push(symbol);
-            containerRow.addChild(symbol);
-        }
-        reels.push(reel);
+            // Build the symbols
+            for (let j = 0; j < 3; j++) {
+                const symbol = new Sprite(slotTextures[Math.floor(Math.random() * slotTextures.length)]);
+                // Scale the symbol to fit symbol area.
+                symbol.y = j * sizeSymbol;
+                symbol.scale.x = symbol.scale.y = Math.min(sizeSymbol / symbol.width, sizeSymbol / symbol.height);
+                symbol.x = Math.round((sizeSymbol - symbol.width) / 2);
+                reel.symbols.push(symbol);
+                containerRow.addChild(symbol);
+            }
+            reels.push(reel);
     }
     app.stage.addChild(containerGrid);
 
+    // insert cyndaquil icon
     const textureCyn = await Assets.load('images/assets/cyndaquil.png');
     const textureCynFire = await Assets.load('images/assets/cyndaquil-fire.png');
     const sprCyn = Object.assign(Sprite.from(textureCyn), {
         width: 290,
         height: 300,
         anchor: { x: 0.5, y: 0.5 },
-        position: { x: 330, y: 580 },
+        position: { x: 300, y: 580 },
         visible: true,
     });
     sprCyn.scale.x *= -1; // flip horizontally
@@ -224,10 +225,9 @@ await Assets.loadBundle('fonts');
         width: 290,
         height: 300,
         anchor: { x: 0.5, y: 0.5 },
-        position: { x: 1590, y: 580 },
+        position: { x: 1620, y: 580 },
         visible: true,
     });
-
     const sprCynF = Object.assign(Sprite.from(textureCynFire), {
         width: 400,
         height: 400,
@@ -249,52 +249,133 @@ await Assets.loadBundle('fonts');
     app.stage.addChild(sprCynF);
     app.stage.addChild(sprCynF1);
 
+    // create a container for balance display
+    const containerCoins = new Container();
+        app.stage.addChild(containerCoins);
+
+        const rectCoins = new Graphics()
+        .roundRect(0,0, 280, 70, 30)
+        .fill({
+            color:'#870303', // Sets the color
+            })
+        .stroke({
+            width: 2,
+            color: 0xFFCB00
+        });
+        containerCoins.addChild(rectCoins);
+
+        containerCoins.position.set(1490,280);
+
+        const balance: { value: number } = { value: 1000 }; // Use an object to update the balance reference
+
+        const textStyle = new TextStyle({
+            dropShadow: true,
+            fill: "#fec702",
+            fontFamily: "pokemon",
+            letterSpacing: 5,
+            fontSize:23,
+        });
+        const txtCoins = new Text({
+            text: balance.value.toString(),
+            style: textStyle
+        });
+        txtCoins.anchor.set(0.5);
+        txtCoins.x = 150;
+        txtCoins.y = rectCoins.height / 2;
+
+        const textureBall = await Assets.load('images/assets/pokeball.png');
+        const sprBall = Sprite.from(textureBall);
+
+        sprBall.setSize(30,30);
+        sprBall.x = 80;
+        sprBall.y = ((containerCoins.width - txtCoins.width) / 12);
+        containerCoins.addChild(sprBall);
+        containerCoins.addChild(txtCoins);
+
+    // container for wins
+    const containerWins = new Container();
+        const rectWins = new Graphics()
+        .roundRect(0,0, 280, 70, 30)
+        .fill({
+            color:'#870303', // Sets the color
+            })
+        .stroke({
+            width: 2,
+            color: 0x56ff74
+        });
+        containerWins.addChild(rectWins);
+
+        containerWins.position.set(140,280);
+
+        const winnings: { value: number } = { value: 0 }; // Use an object to update the balance reference
+
+        const textStyle1 = new TextStyle({
+            dropShadow: true,
+            fill: "#fec702",
+            fontFamily: "pokemon",
+            letterSpacing: 5,
+        });
+        const txtWins = new Text({
+            text: winnings.value.toString(),
+            style: textStyle1
+        });
+        txtWins.anchor.set(0.5);
+        txtWins.x = 150;
+        txtWins.y = rectWins.height / 2;
+
+        const texturePlus = await Assets.load('images/assets/plus.png');
+        const sprPlus = Sprite.from(texturePlus);
+
+        sprPlus.setSize(25,25);
+        sprPlus.y = 20;
+        sprPlus.x = ((containerWins.width - txtWins.width)/2.5);
+        containerWins.addChild(sprPlus);
+        containerWins.addChild(txtWins);
+
+    app.stage.addChild(containerWins);
+
     // create container for the spin button
     const containerSpin = new Container();
+        const textureBtn = await Assets.load('images/assets/spin.png');
+        const sprBtn = Sprite.from(textureBtn);
+
+        containerSpin.addChild(sprBtn);
+
+        // make spin clickable
+        containerSpin.eventMode = 'static';
+        containerSpin.cursor = 'pointer';
+
+        sprBtn.width = 100;
+        sprBtn.height = 60;
+
+        const textureGl = await Assets.load('images/assets/gl.png');
+        const sprGl = Sprite.from(textureGl);
+
+        containerSpin.addChild(sprGl);
+        containerSpin.x = (app.screen.width - sprBtn.width) / 2;
+        containerSpin.y = 750;
+
+        sprGl.width = 190;
+        sprGl.height = 70;
+        sprGl.visible = false;
+        sprGl.position.set(-38,0);
+
     app.stage.addChild(containerSpin);
-
-    const textureBtn = await Assets.load('images/assets/spin.png');
-    const sprBtn = Sprite.from(textureBtn);
-
-    sprBtn.width = 550;
-    sprBtn.height = 70;
-
-    containerSpin.addChild(sprBtn);
-    containerSpin.x = (app.screen.width - sprBtn.width) / 2;
-    containerSpin.y = 750;
-
-    // make spin clickable
-    containerSpin.eventMode = 'static';
-    containerSpin.cursor = 'pointer';
-
-    const textureGl = await Assets.load('images/assets/gl.png');
-    const sprGl = Sprite.from(textureGl);
-
-    sprBtn.width = 550;
-    sprBtn.height = 70;
-
-    containerSpin.addChild(sprGl);
-    containerSpin.x = (app.screen.width - sprBtn.width) / 2;
-    containerSpin.y = 750;
-
-    sprGl.width = 550;
-    sprGl.height = 70;
-    sprGl.visible = false;
 
     containerSpin.addListener('pointerdown', () =>{
         play();
     });
-    let isSpinVisible = true;
+
     let blinkSpeed = 0.01;
     let increasing = false;
 
     app.ticker.add(() => { // create blinking animation for spin button
         if (increasing) {
             sprBtn.alpha += blinkSpeed;
-            if (sprBtn.alpha >= 1) increasing = false, isSpinVisible = false; // Reverse direction
+            if (sprBtn.alpha >= 1) increasing = false; // Reverse direction
         } else {
             sprBtn.alpha -= blinkSpeed;
-            if (sprBtn.alpha <= 0.2) increasing = true, isSpinVisible = false; // Reverse direction
+            if (sprBtn.alpha <= 0.2) increasing = true; // Reverse direction
         }
 
     });
@@ -302,10 +383,18 @@ await Assets.loadBundle('fonts');
     let running = false;
 
     function play(){
+        // update text values
+        balance.value -= 5;
+        txtCoins.text = balance.value.toString();
+        winnings.value += Math.floor(Math.random() * 11);
+        txtWins.text = winnings.value.toString();
+
+        // set properties of elements
+        containerSpin.interactive = false;
+        containerSpin.cursor = 'null';
         [sprCyn, sprCyn1, sprBtn ].forEach(sprite => sprite.visible = false);
         [sprCynF, sprCynF1, sprGl].forEach(sprite => sprite.visible = true);
-        sprBtn.visible=false;
-        sprGl.visible=true;
+
         if (running) return;
         running = true;
 
@@ -323,6 +412,8 @@ await Assets.loadBundle('fonts');
     function reelsComplete() {
         [sprCynF, sprCynF1, sprGl].forEach(sprite => sprite.visible = false);
         [sprCyn, sprCyn1, sprBtn].forEach(sprite => sprite.visible = true);
+        containerSpin.interactive = true;
+        containerSpin.cursor = 'pointer';
         running = false;
     }
 
@@ -351,27 +442,6 @@ await Assets.loadBundle('fonts');
         }
     });
 
-        // create coin area
-        const containerCoins = new Container();
-        app.stage.addChild(containerCoins);
-
-        const rectCoins = new Graphics()
-        .roundRect(0,0, 320, 90)
-        .fill({
-            color:'#530202', // Sets the color
-          })
-        .stroke({
-            width: 2,
-            color: 0xFFCB00
-        });
-        containerCoins.addChild(rectCoins);
-        containerCoins.y = 280;
-        containerCoins.x = 1450;
-
-        const balance: number = 1000;
-        const txtCoins = new Text({text: balance, style:{fontFamily: 'pokemon'}})
-
-        containerCoins.addChild(txtCoins)
     // Very simple tweening utility function. This should be replaced with a proper tweening library in a real product.
     const tweening: any[] = [];
 
@@ -410,17 +480,14 @@ await Assets.loadBundle('fonts');
                 remove.push(t);
             }
         }
-
         for (let i = 0; i < remove.length; i++) {
             tweening.splice(tweening.indexOf(remove[i]), 1);
         }
     });
-
     // Basic lerp function.
     function lerp(a1: number, a2: number, t: number): number {
         return a1 * (1 - t) + a2 * t;
     }
-
     // Backout function from tweenjs.
     function backout(amount: number) {
         return (t: number) => --t * t * ((amount + 1) * t + amount) + 1;
