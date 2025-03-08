@@ -18,7 +18,6 @@ Assets.addBundle('fonts', [{alias: 'Irish', src: 'fonts/IrishGrover-Regular.ttf 
 await Assets.loadBundle('fonts');
 
 (async () => {
-
     // create new app
     const app = new Application();
     //initialize dev tool on the app
@@ -33,7 +32,7 @@ await Assets.loadBundle('fonts');
     app.canvas.style.position = "absolute";
 
     // load background image
-    const textureBg = await Assets.load('images/assets/back.png');
+    const textureBg = await Assets.load('assets/images/back.png');
     const sprBg = Sprite.from(textureBg);
 
     // set bg to the same dimension as screen
@@ -47,19 +46,19 @@ await Assets.loadBundle('fonts');
 
     // load textures for tiling
     const textures = await Assets.load([
-        "images/assets/middle.png",
-        "images/assets/front.png"
+        "assets/images/middle.png",
+        "assets/images/front.png"
     ]);
 
     // create tiling sprite
     const sprMiddle = new TilingSprite({
-        texture: textures["images/assets/middle.png"],
+        texture: textures["assets/images/middle.png"],
         width: app.screen.width,
         height: app.screen.height
     });
 
     const sprFront = new TilingSprite({
-        texture: textures["images/assets/front.png"],
+        texture: textures["assets/images/front.png"],
         width: app.screen.width,
         height: app.screen.height
     });
@@ -89,7 +88,7 @@ await Assets.loadBundle('fonts');
     app.stage.addChild(containerTitle);
 
         // load logo
-        const textureLogo = await Assets.load('images/assets/SLOT.png');
+        const textureLogo = await Assets.load('assets/images/SLOT.png');
         const sprLogo = Sprite.from(textureLogo);
         app.stage.addChild(sprLogo);
 
@@ -134,34 +133,34 @@ await Assets.loadBundle('fonts');
 
     // Load the textures
     await Assets.load([
-        'images/assets/9.png',
-        'images/assets/A.png',
-        'images/assets/J.png',
-        'images/assets/K.png',
-        'images/assets/Q.png',
-        'images/assets/10.png',
-        'images/assets/wild.png',
-        'images/assets/bonus.png',
-        'images/assets/s1.png',
-        'images/assets/s2.png',
-        'images/assets/s3.png',
-        'images/assets/s4.png'
+        'assets/images/9.png',
+        'assets/images/A.png',
+        'assets/images/J.png',
+        'assets/images/K.png',
+        'assets/images/Q.png',
+        'assets/images/10.png',
+        'assets/images/wild.png',
+        'assets/images/bonus.png',
+        'assets/images/s1.png',
+        'assets/images/s2.png',
+        'assets/images/s3.png',
+        'assets/images/s4.png'
     ]);
 
     // Create different slot symbols
     const slotTextures: Texture[] = [
-        Texture.from('images/assets/A.png'),
-        Texture.from('images/assets/9.png'),
-        Texture.from('images/assets/J.png'),
-        Texture.from('images/assets/K.png'),
-        Texture.from('images/assets/Q.png'),
-        Texture.from('images/assets/10.png'),
-        Texture.from('images/assets/wild.png'),
-        Texture.from('images/assets/bonus.png'),
-        Texture.from('images/assets/s1.png'),
-        Texture.from('images/assets/s2.png'),
-        Texture.from('images/assets/s3.png'),
-        Texture.from('images/assets/s4.png')
+        Texture.from('assets/images/A.png'),
+        Texture.from('assets/images/9.png'),
+        Texture.from('assets/images/J.png'),
+        Texture.from('assets/images/K.png'),
+        Texture.from('assets/images/Q.png'),
+        Texture.from('assets/images/10.png'),
+        Texture.from('assets/images/wild.png'),
+        Texture.from('assets/images/bonus.png'),
+        Texture.from('assets/images/s1.png'),
+        Texture.from('assets/images/s2.png'),
+        Texture.from('assets/images/s3.png'),
+        Texture.from('assets/images/s4.png')
     ];
 
     // Set size of sprites and slots
@@ -210,8 +209,8 @@ await Assets.loadBundle('fonts');
     app.stage.addChild(containerGrid);
 
     // insert cyndaquil icon
-    const textureCyn = await Assets.load('images/assets/cyndaquil.png');
-    const textureCynFire = await Assets.load('images/assets/cyndaquil-fire.png');
+    const textureCyn = await Assets.load('assets/images/cyndaquil.png');
+    const textureCynFire = await Assets.load('assets/images/cyndaquil-fire.png');
     const sprCyn = Object.assign(Sprite.from(textureCyn), {
         width: 290,
         height: 300,
@@ -283,7 +282,7 @@ await Assets.loadBundle('fonts');
         txtCoins.x = 150;
         txtCoins.y = rectCoins.height / 2;
 
-        const textureBall = await Assets.load('images/assets/pokeball.png');
+        const textureBall = await Assets.load('assets/images/pokeball.png');
         const sprBall = Sprite.from(textureBall);
 
         sprBall.setSize(30,30);
@@ -323,7 +322,7 @@ await Assets.loadBundle('fonts');
         txtWins.x = 150;
         txtWins.y = rectWins.height / 2;
 
-        const texturePlus = await Assets.load('images/assets/plus.png');
+        const texturePlus = await Assets.load('assets/images/plus.png');
         const sprPlus = Sprite.from(texturePlus);
 
         sprPlus.setSize(25,25);
@@ -336,7 +335,7 @@ await Assets.loadBundle('fonts');
 
     // create container for the spin button
     const containerSpin = new Container();
-        const textureBtn = await Assets.load('images/assets/spin.png');
+        const textureBtn = await Assets.load('assets/images/spin.png');
         const sprBtn = Sprite.from(textureBtn);
 
         containerSpin.addChild(sprBtn);
@@ -348,7 +347,7 @@ await Assets.loadBundle('fonts');
         sprBtn.width = 100;
         sprBtn.height = 60;
 
-        const textureGl = await Assets.load('images/assets/gl.png');
+        const textureGl = await Assets.load('assets/images/gl.png');
         const sprGl = Sprite.from(textureGl);
 
         containerSpin.addChild(sprGl);
